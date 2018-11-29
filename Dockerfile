@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
     apt-get install -y \
+    iputils-ping \
     mysql-client \
     vim && \
     rm -rf /var/lib/apt/lists/*
@@ -34,6 +35,7 @@ RUN /usr/local/go/bin/go build -o /usr/local/bin/wp-search-replace && \
     rm -rf /usr/local/go
 
 COPY docker-entrypoint.sh /usr/local/bin/
+COPY export /usr/local/bin/
 
 WORKDIR /var/www/html
 

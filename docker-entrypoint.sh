@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
@@ -22,6 +22,11 @@ file_env() {
 	export "$var"="$val"
 	unset "$fileVar"
 }
+
+while ! mysqladmin ping -h"$WORDPRESS_DB_HOST" --silent; do
+	echo "waiting for MySQL server..."
+    sleep 2
+done
 
 if [ "$(id -u)" = '0' ]; then
 	case "$1" in
@@ -246,15 +251,11 @@ EOPHP
 fi
 
 
-while ! mysqladmin ping -h"$WORDPRESS_DB_HOST" --silent; do
-	echo "waiting for $WORDPRESS_DB_HOST"
-    sleep 1
-done
-
-# search replace DB
-wp-search-replace "$1" "$2"
-
-wp --allow-root db export /db/db.sql
+if [ "$#" -eq 2 ]; then
+	wp-search-replace "$1" "$2"
+else 
+	exec "$@"
+fi
 
 # now that we're definitely done writing configuration, let's clear out the relevant envrionment variables (so that stray "phpinfo()" calls don't leak secrets from our code)
 for e in "${envs[@]}"; do

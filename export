@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /var/www/html
+wp --allow-root db export /db/db.sql
